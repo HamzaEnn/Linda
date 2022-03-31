@@ -38,7 +38,7 @@ public class TestFamine {
                 }
             }.start();
         }
-        
+
         for (int i = 1; i <= 4; i++) {
             final int j = i;
             new Thread() {  
@@ -50,8 +50,8 @@ public class TestFamine {
                     }
 
                     Tuple t3 = new Tuple(4, "foo");
-                    System.out.println("("+j+") write: " + t3);
                     linda.write(t3);
+                    System.out.println("("+j+") write: " + t3);
                                     
                     linda.debug("("+j+")");
 
