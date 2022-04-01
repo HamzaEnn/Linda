@@ -2,6 +2,7 @@ package linda.shm;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 import linda.Callback;
 import linda.Linda;
@@ -67,15 +68,20 @@ public class CentralizedLinda implements Linda {
 	}
 
 	public void write(Tuple t) {
-		
+
 		sync.beginModify();
-		
+
 		espace.add(t.deepclone());
-		sync.wakeEventReg(t, espace);
+		
+		List<Callback> cbs = sync.wakeEventReg(t, espace);
 
 		sync.endModify();
-		sync.wakeConditions(t);
 
+		for (Callback cb : cbs) {
+			cb.call(t);
+		}
+
+		sync.wakeConditions(t);
 
 	}
 
@@ -150,6 +156,7 @@ public class CentralizedLinda implements Linda {
 
 	public void eventRegister(eventMode mode, eventTiming timing, Tuple template, Callback callback) {
 		Tuple res = null;
+
 		if (timing == eventTiming.IMMEDIATE) {
 			if (mode == eventMode.READ) {
 				res = this.tryRead(template);
@@ -161,7 +168,6 @@ public class CentralizedLinda implements Linda {
 		if (res == null) {
 			sync.addEventAlarm(template, callback, mode);
 		} else {
-			debug("call");
 			callback.call(res);
 		}
 		

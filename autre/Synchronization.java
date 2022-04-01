@@ -1,9 +1,7 @@
 package linda.autre;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -136,7 +134,7 @@ public class Synchronization {
 		lockAlarm.unlock();
 
 	}
-	
+
 	public Tuple getTupleWhenExists(Tuple template) {
 		lockAlarm.lock();
 		Condition condition = lockAlarm.newCondition();
@@ -183,25 +181,36 @@ public class Synchronization {
 		lockEventReg.unlock();
 	}
 	
-	public void wakeEventReg (Tuple t, EspaceTuples space) {
+	public List<Callback> wakeEventReg (Tuple t, EspaceTuples space) {
 		lockEventReg.lock();
+		int i = 0;
+
+		List<Callback> callbacks = new ArrayList<Callback>();
 
 		for (EventAlarm event : this.events) {
 			if (event.contains(t)) {
 				if (event.getMode() == eventMode.TAKE) {
+					beginModify();
 					if (space.remove(t)) {
 						events.remove(event);
-						event.getCallback().call(t);
-						return;
+						callbacks.add(event.getCallback());
 					}
+					endModify();
+					break;
 				}else {
-					if (space.getAll().contains(t))
-						event.getCallback().call(t);
+					if (space.getAll().contains(t)){
+						callbacks.add(event.getCallback());
+					}
 				}	
 			}
 		}
 
 		lockEventReg.unlock();
+		return callbacks;
+
 	}
 	
+	public void debug(int prefix) {
+		System.out.println(prefix);
+	}
 }
