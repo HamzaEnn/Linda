@@ -15,6 +15,7 @@ public class TestEventRegisterRead {
         public void call(Tuple t) {
             System.out.println("CB got "+t);
             if (compteur < 2) {
+            	linda.debug("compteur < 2");
             	linda.eventRegister(eventMode.READ, eventTiming.IMMEDIATE, cbmotif, this);
             }
             compteur = compteur + 1;

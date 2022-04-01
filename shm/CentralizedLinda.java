@@ -161,6 +161,7 @@ public class CentralizedLinda implements Linda {
 		if (res == null) {
 			sync.addEventAlarm(template, callback, mode);
 		} else {
+			debug("call");
 			callback.call(res);
 		}
 		

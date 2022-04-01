@@ -188,11 +188,11 @@ public class Synchronization {
 
 		for (EventAlarm event : this.events) {
 			if (event.contains(t)) {
-				event.getCallback().call(t);
 				if (event.getMode() == eventMode.TAKE) {
 					if (space.remove(t)) {
 						events.remove(event);
 						event.getCallback().call(t);
+						return;
 					}
 				}else {
 					if (space.getAll().contains(t))
