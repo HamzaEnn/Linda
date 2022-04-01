@@ -73,13 +73,9 @@ public class CentralizedLinda implements Linda {
 
 		espace.add(t.deepclone());
 		
-		List<Callback> cbs = sync.wakeEventReg(t, espace);
 
 		sync.endModify();
-
-		for (Callback cb : cbs) {
-			cb.call(t);
-		}
+		sync.wakeEventReg(t, espace);
 
 		sync.wakeConditions(t);
 

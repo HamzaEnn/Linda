@@ -181,11 +181,9 @@ public class Synchronization {
 		lockEventReg.unlock();
 	}
 	
-	public List<Callback> wakeEventReg (Tuple t, EspaceTuples space) {
+	public void wakeEventReg (Tuple t, EspaceTuples space) {
 		lockEventReg.lock();
 		int i = 0;
-
-		List<Callback> callbacks = new ArrayList<Callback>();
 
 		for (EventAlarm event : this.events) {
 			if (event.contains(t)) {
@@ -193,24 +191,23 @@ public class Synchronization {
 					beginModify();
 					if (space.remove(t)) {
 						events.remove(event);
-						callbacks.add(event.getCallback());
+						event.callback.call(t);
 					}
 					endModify();
 					break;
 				}else {
 					if (space.getAll().contains(t)){
-						callbacks.add(event.getCallback());
+						event.getCallback().call(t);
 					}
 				}	
 			}
 		}
 
 		lockEventReg.unlock();
-		return callbacks;
 
 	}
 	
-	public void debug(int prefix) {
+	public void debug(String prefix) {
 		System.out.println(prefix);
 	}
 }
