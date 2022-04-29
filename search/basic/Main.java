@@ -9,20 +9,29 @@ public class Main {
             System.err.println("linda.search.basic.Main search file.");
             return;
     	}*/
-
-    	int length = args.length;
-    	String path = args[length-1];
+    	String[] motsAChercher = {"agneau" , "chien", "chat", "humain"};
+    	int nbChercheurs = 5;
+    	int nbManagers = 4;
+    	String currentDir = System.getProperty("user.dir");
     	
-        Manager manager;
-        Searcher searcher;
-        for (String elt : args) {
-            manager = new Manager(new linda.server.LindaClient("//localhost:4000/LindaServer"), path, elt);
+        
+        for (int i = 0; i < nbManagers ; i++) {
+        	Linda linda = new linda.server.LindaClient("//localhost:4000/LindaServer");
+            Manager manager = new Manager(linda, currentDir + "\\texte.txt", motsAChercher[i]);
             (new Thread(manager)).start();
         }
-        for (String elt : args) {
-        	searcher = new Searcher(new linda.server.LindaClient("//localhost:4000/LindaServer"));
+        for (int i = 0; i < nbChercheurs ; i++) {
+        	Linda linda = new linda.server.LindaClient("//localhost:4000/LindaServer");
+        	Searcher searcher = new Searcher(linda);
             (new Thread(searcher)).start();
         }
         
+        /*
+         * Bloqué dans cette application :
+         * 
+         * Erreurs dans la lecture d'un fichier un peu grand.
+         * Echec de la terminaison après avoir trouvé le bon mot.
+         * 
+         */
     }
 }

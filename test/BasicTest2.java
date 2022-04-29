@@ -8,7 +8,7 @@ public class BasicTest2 {
         final Linda linda = new linda.shm.CentralizedLinda();
         //              final Linda linda = new linda.server.LindaClient("//localhost:4000/LindaServer");
                 
-        for (int i = 1; i <= 3; i++) {
+        for (int i = 1; i <= 4; i++) {
             final int j = i;
             new Thread() {  
                 public void run() {
@@ -18,13 +18,13 @@ public class BasicTest2 {
                         e.printStackTrace();
                     }
                     Tuple motif = new Tuple(Integer.class, String.class);
-                    Tuple res = linda.read(motif);
+                    Tuple res = linda.take(motif);
                     System.out.println("("+j+") Resultat:" + res);
                     linda.debug("("+j+")");
                 }
             }.start();
         }
-                
+
         new Thread() {
             public void run() {
                 try {
@@ -44,6 +44,18 @@ public class BasicTest2 {
                 linda.debug("(0)");
 
                 Tuple t3 = new Tuple(4, "foo");
+                System.out.println("(0) write: " + t3);
+                linda.write(t3);
+                                
+                linda.debug("(0)");
+
+                Tuple t4 = new Tuple(5, "foo");
+                System.out.println("(0) write: " + t3);
+                linda.write(t3);
+                                
+                linda.debug("(0)");
+
+                Tuple t5 = new Tuple(6, "foo");
                 System.out.println("(0) write: " + t3);
                 linda.write(t3);
                                 
