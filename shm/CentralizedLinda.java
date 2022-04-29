@@ -8,6 +8,7 @@ import linda.Tuple;
 import linda.autre.EspaceTuples;
 import linda.autre.Synchronization;
 
+
 /** Shared memory implementation of Linda. */
 public class CentralizedLinda implements Linda {
 
@@ -103,7 +104,6 @@ public class CentralizedLinda implements Linda {
 
 		return res;
 	}
-
 	public Tuple tryRead(Tuple template) {
 
 		// Demander l'acces pour lire dans l'espace de tuple
@@ -115,6 +115,7 @@ public class CentralizedLinda implements Linda {
 		sync.endRead();
 
 		return res;
+
 
 	}
 
@@ -128,11 +129,13 @@ public class CentralizedLinda implements Linda {
 		for (Tuple t : this.espace.getAll()) {
 			if (t.matches(template)) {
 				espace.remove(t);
+
 				res.add(t);
 			}
 		}
 
 		sync.endModify();
+
 
 		return res;
 
@@ -146,6 +149,7 @@ public class CentralizedLinda implements Linda {
 		sync.beginRead();
 
 		for (Tuple t : this.espace.getAll()) {
+
 			if (t.matches(template)) {
 				res.add(t.deepclone());
 			}
@@ -153,10 +157,12 @@ public class CentralizedLinda implements Linda {
 
 		sync.endRead();
 
+
 		return res;
 	}
 
 	public void eventRegister(eventMode mode, eventTiming timing, Tuple template, Callback callback) {
+
 		Tuple res = null;
 
 		// Si on cherche immediatement, on fait une recherche non bloquante
@@ -184,6 +190,7 @@ public class CentralizedLinda implements Linda {
 
 	public void debug(String prefix) {
 		System.out.println(prefix);
+
 	}
 
 }
