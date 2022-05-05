@@ -1,4 +1,9 @@
 package linda.autre;
+
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
 import java.util.concurrent.locks.Condition;
 
 import linda.Tuple;
@@ -8,17 +13,12 @@ public class TupleAlarm {
 	private Tuple template;
 	private Condition condition;
 	private Tuple result = null;
-	private Boolean take;
 	
-	public TupleAlarm(Tuple _template, Condition _condition, Boolean _take) {
+	public TupleAlarm(Tuple _template, Condition _condition) {
 		template = _template;
 		condition = _condition;
-		take = _take;
 	}
 
-	public boolean taken() {
-		return take;
-	}
 	public boolean containsTuple(Tuple t) {
 		return (t.matches(template));
 	}

@@ -18,6 +18,7 @@ public class TestFamine {
                 Tuple motif = new Tuple(Integer.class, String.class);
                 Tuple res = linda.read(motif);
                 System.out.println("read Resultat:" + res);
+                linda.debug("read");
             }
         }.start();
         

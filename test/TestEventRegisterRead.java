@@ -14,12 +14,11 @@ public class TestEventRegisterRead {
     private static class MyCallback implements Callback {
         public void call(Tuple t) {
             System.out.println("CB got "+t);
-            
-            compteur = compteur + 1;
             if (compteur < 2) {
+            	linda.debug("compteur < 2");
             	linda.eventRegister(eventMode.READ, eventTiming.IMMEDIATE, cbmotif, this);
             }
-            
+            compteur = compteur + 1;
             try {
                 Thread.sleep(1000);
             } catch (InterruptedException e) {

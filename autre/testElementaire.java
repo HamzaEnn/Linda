@@ -2,6 +2,7 @@ package linda.autre;
 
 import linda.Linda;
 import linda.Tuple;
+import linda.shm.CentralizedLinda;
 
 public class testElementaire {
 

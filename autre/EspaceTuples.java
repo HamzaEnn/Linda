@@ -1,6 +1,7 @@
 package linda.autre;
 
 import java.util.ArrayList;
+import java.util.concurrent.locks.ReentrantLock;
 
 import linda.Tuple;
 
@@ -19,7 +20,7 @@ public class EspaceTuples {
 		return this.espace.size();
 	}
 	
-	// Retourner un element de l'espace ï¿½ partir d'un indice
+	// Retourner un element de l'espace à partir d'un indice
 	public Tuple get(int index) {
 		return this.espace.get(index);
 	}
@@ -28,7 +29,7 @@ public class EspaceTuples {
 		return new ArrayList<Tuple>(this.espace);
 	}
 	
-	// Supprimer un element de l'espace de tuples ï¿½ partir d'un indice
+	// Supprimer un element de l'espace de tuples à partir d'un indice
 	public void remove(int index) {
 		this.espace.remove(index);
 	}
@@ -41,7 +42,7 @@ public class EspaceTuples {
 		this.espace.add(tuple);
 	}
 	
-	// Chercher un element de l'espace ï¿½ partir d'un tuple template.
+	// Chercher un element de l'espace à partir d'un tuple template.
 	public Tuple rechercher(Tuple template, Boolean take) {
 		Tuple res = null;
 		int taille = this.getSize();
