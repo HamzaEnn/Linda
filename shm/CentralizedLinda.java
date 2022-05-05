@@ -9,6 +9,7 @@ import linda.Tuple;
 import linda.autre.EspaceTuples;
 import linda.autre.Synchronization;
 
+
 /** Shared memory implementation of Linda. */
 public class CentralizedLinda implements Linda {
 
@@ -113,6 +114,36 @@ public class CentralizedLinda implements Linda {
 		return res;
 	}
 
+<<<<<<< HEAD
+=======
+	public Tuple tryTake(Tuple template) {
+
+		// Demander l'acces pour écrire(modifier) dans l'espace de tuple
+		sync.beginModify();
+
+		Tuple res = espace.rechercher(template, true);
+
+		// Donner l'acces à l'opération suivante dans la file d'attente FIFO
+		sync.endModify();
+
+		return res;
+	}
+	public Tuple tryRead(Tuple template) {
+
+		// Demander l'acces pour lire dans l'espace de tuple
+		sync.beginRead();
+
+		Tuple res = espace.rechercher(template, false);
+
+		// Donner l'acces à l'opération suivante dans la file d'attente FIFO
+		sync.endRead();
+
+		return res;
+
+
+	}
+
+>>>>>>> ff6b57814c88dd66d4d7cb227fd29c020c6b8d90
 	public Collection<Tuple> takeAll(Tuple template) {
 
 		ArrayList<Tuple> res = new ArrayList<Tuple>();
@@ -121,11 +152,13 @@ public class CentralizedLinda implements Linda {
 		for (Tuple t : this.espace.getAll()) {
 			if (t.matches(template)) {
 				espace.remove(t);
+
 				res.add(t);
 			}
 		}
 
 		sync.endModify();
+
 
 		return res;
 
@@ -138,6 +171,7 @@ public class CentralizedLinda implements Linda {
 		sync.beginRead();
 
 		for (Tuple t : this.espace.getAll()) {
+
 			if (t.matches(template)) {
 				res.add(t.deepclone());
 			}
@@ -145,10 +179,12 @@ public class CentralizedLinda implements Linda {
 
 		sync.endRead();
 
+
 		return res;
 	}
 
 	public void eventRegister(eventMode mode, eventTiming timing, Tuple template, Callback callback) {
+
 		Tuple res = null;
 		if (timing == eventTiming.IMMEDIATE) {
 			if (mode == eventMode.READ) {
@@ -169,6 +205,7 @@ public class CentralizedLinda implements Linda {
 
 	public void debug(String prefix) {
 		System.out.println(prefix);
+
 	}
 
 }
