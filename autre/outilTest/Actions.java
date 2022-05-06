@@ -3,24 +3,26 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import linda.shm.CentralizedLinda;
+
 public class Actions {
 
-    private static List<Object> listeV;
+    private static List<Object> in;
+    private static List<Object> out;
     private static List<Method> methods;
     private static Boolean init = false;
 
     public void Initialize(){
-        this.listeV = new ArrayList<Object>();
+        this.in = new ArrayList<Object>();
+        this.out = new ArrayList<Object>();
         this.methods = new ArrayList<Method>();
 
 
     }
 
-    public void processWord(String word, Iterator<String> iterator) {
-        switch(word) {
-            case ""
-        }
-    }
+	public static List<Object> getParameters(String word) {
+		return null;
+	}
 
     
 

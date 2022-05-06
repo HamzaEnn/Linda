@@ -1,13 +1,17 @@
+package linda.autre.outilTest;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
+import linda.Linda;
 import linda.autre.outilTest.MisUseException;
+import linda.shm.CentralizedLinda;
 
 public class Processes {
 
@@ -19,15 +23,14 @@ public class Processes {
 		this.file = _file;
 	}
 
-    private void processFile() throws IOException {
+    public void processFile(Linda linda) throws IOException, MisUseException {
 		BufferedReader br
         		= new BufferedReader(new FileReader(file));
 		
 		String lineStr;
 		while ((lineStr = br.readLine()) != null) {
-
 			List<String> line = strToArray(lineStr);
-			this.threads.add(processLine(line));
+			this.threads.add(processLine(line, linda));
 		}
 		
 		for (Thread thread : this.threads) {
@@ -35,20 +38,34 @@ public class Processes {
 		}
 	}
 	
-	private Thread processLine(List<String> line) throws MisUseException {
-		int nbBoucles;
+	private Thread processLine(List<String> line, Linda linda) throws MisUseException {
+		//int nbBoucles;
 		Iterator<String> iterator = line.iterator();
 		Thread thread;
-
+		Method method;
+/*
 		try {
 			nbBoucles = Integer.parseInt(iterator.next());
 		} catch (Exception e) {
 			throw new MisUseException();
 		}
+*/
+		thread = new Thread() {
+			public void run() {
+				while (iterator.hasNext()) {
+					String word = iterator.next();
+					try {
+						method = CentralizedLinda.class.getMethod(word);
+					} catch (NoSuchMethodException | SecurityException e) {
+						e.printStackTrace();
+					}
+					List<Object> listPar = Actions.getParameters(word);
+					method.invoke(linda, listPar);
+					
+				}
+			}
+		};
 
-		while (iterator.hasNext()) {
-			Actions.processWord(iterator.next());
-		}
 	}
     
 	
