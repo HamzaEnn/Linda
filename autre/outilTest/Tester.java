@@ -15,53 +15,13 @@ import java.util.UnknownFormatConversionException;
  */
 public class Tester {
 
-	List<Thread> threads;
-	File file;
+	Processes process;
 
 	private Tester(File _file) {
-		this.threads = new ArrayList<Thread>();
-		this.file = _file;
+		this.process = new Processes(_file);
 	}
 
-	private void processFile() throws IOException {
-		BufferedReader br
-        		= new BufferedReader(new FileReader(file));
-		
-		String lineStr;
-		while ((lineStr = br.readLine()) != null) {
-
-			List<String> line = strToArray(lineStr);
-			this.threads.add(processLine(line));
-		}
-		
-		for (Thread thread : this.threads) {
-			thread.start();
-		}
-	}
 	
-	private List<String> strToArray(String str) {
-		String st[] = str.split(" ");
-		List<String> liste = new ArrayList<String>();
-
-		liste = Arrays.asList(st);
-		return liste;
-	}
-	
-	private Thread processLine(List<String> line) throws MisUseException {
-		int nbBoucles;
-		Iterator<String> iterator = line.iterator();
-		Thread thread;
-
-		try {
-			nbBoucles = Integer.parseInt(iterator.next());
-		} catch (Exception e) {
-			throw new MisUseException();
-		}
-
-		while (iterator.hasNext()) {
-			Actions.processWord(iterator.next(), iterator);
-		}
-	}
 	
 	
 	public static void main(String[] args) {
