@@ -9,14 +9,24 @@ import java.util.Random;
 
 public class LoadBalancer extends Thread {
 
-    static String hosts[] = {"host1", "host2"};
-    static int ports[] = {8081, 8082};
-    static int nbHosts = 2;
+    static String hosts[];// = {"host1", "host2"};
+    static int ports[];// = {8081, 8082};
+    static int nbHosts = 0;
     static Random rand = new Random();
     Socket s1;
 
     public LoadBalancer(Socket s) {
         this.s1 = s;
+    }
+
+    public void setHP(String h[], int p[]) {
+        this.hosts = h;
+        this.ports = p;
+        this.nbHosts = h.length;
+    }
+
+    public void close() throws IOException {
+        this.s1.close();
     }
 
     public static void main (String args[]) {

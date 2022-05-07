@@ -10,6 +10,7 @@ import java.util.Collection;
 import linda.Linda;
 import linda.Linda.eventMode;
 import linda.Linda.eventTiming;
+import linda.shm.CentralizedLinda;
 import linda.Tuple;
 
 public class LindaServeurImpl extends UnicastRemoteObject implements LindaServeur {
@@ -21,8 +22,12 @@ public class LindaServeurImpl extends UnicastRemoteObject implements LindaServeu
 
 	private Linda linda;
 
-	protected LindaServeurImpl() throws RemoteException {
+	public LindaServeurImpl() throws RemoteException {
 		this.linda = new linda.shm.CentralizedLinda();
+	}
+	
+	public void changeLinda(CentralizedLinda l) throws RemoteException {
+		this.linda = l;
 	}
 
 	@Override
@@ -82,7 +87,7 @@ public class LindaServeurImpl extends UnicastRemoteObject implements LindaServeu
 			System.out.println(" Please enter: java HelloImpl <port>"); return;
 		}*/
 		try {
-			// Launching the naming service – rmiregistry – within the JVM
+			// Launching the naming service ï¿½ rmiregistry ï¿½ within the JVM
 			Registry registry = LocateRegistry.createRegistry(port);
 			// Create an instance of the server object
 			LindaServeur linda = new LindaServeurImpl();
