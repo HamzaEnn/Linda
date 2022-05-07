@@ -2,195 +2,210 @@ package linda.shm;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
+
+import linda.AsynchronousCallback;
 import linda.Callback;
 import linda.Linda;
 import linda.Tuple;
-import linda.autre.EspaceTuples;
-import linda.autre.Synchronization;
-
 
 /** Shared memory implementation of Linda. */
 public class CentralizedLinda implements Linda {
+	
+	private List<Lock> queue = new ArrayList<Lock>();
+	private List<Tuple> tuplespace = Collections.synchronizedList(new ArrayList<Tuple>());
+	private Lock notFoundTuple = new ReentrantLock();
 
-	// Espace principal de tuples
-	private EspaceTuples espace;
-
-	// objet offrant des methodes d'acces pour les different methodes read/write/take/...
-	private Synchronization sync;
-
-	// Constructeur du centralised Linda
 	public CentralizedLinda() {
-		espace = new EspaceTuples();
-		sync = new Synchronization();
 	}
-
-	public void write(Tuple t) {
-
-		// Demander l'acces pour écrire(modifier) dans l'espace de tuple
-		sync.beginModify();
-
-		//Ajout d'une copie du tuple dans l'espace
-		espace.add(t.deepclone());
-
-		// Donner l'acces à l'opération suivante dans la file d'attente FIFO
-		sync.endModify();
-
-		//Révéiller les callbacks en attente d'un tuple correspondant
-		//et les conditions correspondantes à des lectures(read) et des extractions(take) en attentes
-		sync.wakeUp(t, espace);
-
-
-	}
-
-	public Tuple take(Tuple template) {
-		// Essayer de prendre un tuple correspondant
-		// et puis on révéille les opérations dans la file FIFO
-		Tuple res = tryTake(template);
-
-		// On trouve aucun tuple matching le motif
-		if (res == null)
-			// on attend (en se bloquant sur une condition) une écriture d'un tuple qui matche le motif
-			res = takeInFuture(template);
-		return res;
-	}
-
-	// Méthode pour extraire un tuple correspondant au motif
-	// si on trouve aucun tuple avec tryTake
-	private Tuple takeInFuture(Tuple template) {
-
-		//Booleen qui indique qu'on a efféctué l'extraction avec succés
-		boolean took = false;
-		//Le tuple à extraire
-		Tuple res = null;
-
-		while (!took) {
-			// bloque jusqu'à ce qu'un bon tuple vient d'etre écrit
-			res = sync.getTupleWhenExists(template, true);
-
-			// Demander l'acces pour supprimer
-			sync.beginModify();
-
-			took = this.espace.remove(res);
-
-			sync.endModify();
-		}
-
-		return res;
-	}
-
-	public Tuple read(Tuple template) {
-
-		// Essayer de lire un tuple correspondant
-		// et puis on révéille les opérations dans la file FIFO
-		Tuple res = tryRead(template);
-
-		if (res == null) {
-			// si on trouve pas, on se bloque jusqu'à ce qu'un tuple correspondant apparait dans l'espace.
-			res = sync.getTupleWhenExists(template, false);
-		}
-		
-		return res;
-	}
-
-	public Tuple tryTake(Tuple template) {
-
-		// Demander l'acces pour écrire(modifier) dans l'espace de tuple
-		sync.beginModify();
-
-		Tuple res = espace.rechercher(template, true);
-
-		// Donner l'acces à l'opération suivante dans la file d'attente FIFO
-		sync.endModify();
-
-		return res;
-	}
-	public Tuple tryRead(Tuple template) {
-
-		// Demander l'acces pour lire dans l'espace de tuple
-		sync.beginRead();
-
-		Tuple res = espace.rechercher(template, false);
-
-		// Donner l'acces à l'opération suivante dans la file d'attente FIFO
-		sync.endRead();
-
-		return res;
-
-
-	}
-
-	public Collection<Tuple> takeAll(Tuple template) {
-
-		// liste des resultats
-		ArrayList<Tuple> res = new ArrayList<Tuple>();
-		
-		sync.beginModify();
-
-		for (Tuple t : this.espace.getAll()) {
-			if (t.matches(template)) {
-				espace.remove(t);
-
-				res.add(t);
+	
+	/**
+	 * Auxiliary function putting take and read waiting for an update of the tuplespace.
+	 */
+	public void waiting() {
+		try {
+			synchronized(notFoundTuple) {
+				queue.add(notFoundTuple);
+				notFoundTuple.wait();
 			}
+		} catch (InterruptedException e) {
+			e.printStackTrace();
 		}
-
-		sync.endModify();
-
-
-		return res;
-
 	}
-
-	public Collection<Tuple> readAll(Tuple template) {
-
-		//Liste des resultats
-		ArrayList<Tuple> res = new ArrayList<Tuple>();
-
-		sync.beginRead();
-
-		for (Tuple t : this.espace.getAll()) {
-
-			if (t.matches(template)) {
-				res.add(t.deepclone());
-			}
+	
+	/**
+	 * Auxiliary function translating the behavior of take, read, tryTake and tryRead.
+	 */
+	public Tuple browsing(Tuple template, Boolean remove, Boolean blockingImpl, int index) {
+		// Looking for template in the tuplespace.
+		synchronized(tuplespace) {
+			Iterator<Tuple> it = tuplespace.listIterator(index);
+			while (it.hasNext()) {
+				Tuple tuple = it.next();
+				if (tuple.matches(template)) {
+					if (remove) it.remove();
+					return tuple;
+				}	
+			}	
 		}
 
-		sync.endRead();
-
-
-		return res;
-	}
-
-	public void eventRegister(eventMode mode, eventTiming timing, Tuple template, Callback callback) {
-
-		Tuple res = null;
-
-		// Si on cherche immediatement, on fait une recherche non bloquante
-		if (timing == eventTiming.IMMEDIATE) {
-
-			if (mode == eventMode.READ) {
-				res = this.tryRead(template);
-
-			} else if (mode == eventMode.TAKE) {
-				res = this.tryTake(template);
-
-			} else return;
-
-		}
-
-		// Si on trouve pas ou si le timing est future,
-		// on ajoute une alarme non bloquante (à reveiller par write)
-		if (res == null) {
-			sync.addEventAlarm(template, callback, mode);
+		// If template is not in the tuplespace:
+		if (blockingImpl) {
+			waiting();
+			return browsing(template, remove, blockingImpl, index);
 		} else {
-			callback.call(res);
+			return null;
 		}
-		
+	}
+	
+	/**
+	 * Auxiliary function translating the behavior of takeAll and readAll.
+	 */
+	public Collection<Tuple> browsingAll(Tuple template, Boolean remove) {
+		Collection<Tuple> collection = new ArrayList<Tuple>();
+		synchronized(tuplespace) {
+			Iterator<Tuple> it = tuplespace.listIterator();	
+			while (it.hasNext()) {
+				Tuple tuple = it.next();
+	    		if (tuple.matches(template)) {
+	    			collection.add(tuple);
+	    			if (remove) it.remove();
+	    		}
+			}
+		}
+		return collection;
+	}
+    
+	@Override
+    /**
+     * Adds a tuple t to the tuplespace.
+     */
+    public void write(Tuple t) {
+		// Adding a tuple in the tuplespace.
+		synchronized(tuplespace) {
+			tuplespace.add(t);
+		}
+    	
+    	// Notifying take and read that a new tuple is in the tuplespace.
+    	synchronized(notFoundTuple) {
+    		if (queue.size() != 0) {
+    			Lock waitingTuple = queue.get(0);
+        		queue.remove(waitingTuple);
+        		waitingTuple.notify();
+    		}
+    	}
+	}
+	
+	@Override
+    /** 
+     * Returns a tuple matching the template and removes it from the tuplespace.
+     * Blocks if no corresponding tuple is found.
+     */
+    public Tuple take(Tuple template) {
+		return browsing(template, true, true, 0);
+    }
+
+	@Override
+    /** 
+     * Returns a tuple matching the template and leaves it in the tuplespace.
+     * Blocks if no corresponding tuple is found.
+     */
+    public Tuple read(Tuple template) {
+		return browsing(template, false, true, 0);
 	}
 
-	public void debug(String prefix) {
-		System.out.println(prefix);
+	@Override
+    /** 
+     * Returns a tuple matching the template and removes it from the tuplespace.
+     * Returns null if none found.
+     */
+    public Tuple tryTake(Tuple template) {
+		return browsing(template, true, false, 0);
+    }
 
+	@Override
+    /** 
+     * Returns a tuple matching the template and leaves it in the tuplespace.
+     * Returns null if none found.
+     */
+    public Tuple tryRead(Tuple template) {
+		return browsing(template, false, false, 0);
 	}
 
+	@Override
+    /** 
+     * Returns all the tuples matching the template and removes them from the tuplespace.
+     * Returns an empty collection if none found (never blocks).
+     * Note: there is no atomicity or consistency constraints between takeAll and other methods;
+     * for instance two concurrent takeAll with similar templates may split the tuples between the two results.
+     */
+    public Collection<Tuple> takeAll(Tuple template) {
+		return browsingAll(template, true);
+	}
+
+	@Override
+    /** 
+     * Returns all the tuples matching the template and leaves them in the tuplespace.
+     * Returns an empty collection if none found (never blocks).
+     * Note: there is no atomicity or consistency constraints between readAll and other methods;
+     * for instance (write([1]);write([2])) || readAll([?Integer]) may return only [2].
+     */
+    public Collection<Tuple> readAll(Tuple template) {
+		return browsingAll(template, false);
+	}
+
+    public enum eventMode { READ, TAKE };
+    public enum eventTiming { IMMEDIATE, FUTURE };
+
+    @Override
+    /**
+     * To debug, prints any information it wants (e.g. the tuples in tuplespace or the registered callbacks),
+     * prefixed by <code>prefix</code>.
+     */
+    public void debug(String prefix) {
+    	System.out.println(prefix + " TERMINATED");
+	}
+
+    /** Registers a callback which will be called when a tuple matching the template appears.
+     * If the mode is Take, the found tuple is removed from the tuplespace.
+     * The callback is fired once. It may re-register itself if necessary.
+     * If timing is immediate, the callback may immediately fire if a matching tuple is already present; if timing is future, current tuples are ignored.
+     * Beware: a callback should never block as the calling context may be the one of the writer (see also {@link AsynchronousCallback} class).
+     * Callbacks are not ordered: if more than one may be fired, the chosen one is arbitrary.
+     * Beware of loop with a READ/IMMEDIATE re-registering callback !
+     *
+     * @param mode read or take mode.
+     * @param timing (potentially) immediate or only future firing.
+     * @param template the filtering template.
+     * @param callback the callback to call if a matching tuple appears.
+     */
+	@Override
+	public void eventRegister(linda.Linda.eventMode mode, linda.Linda.eventTiming timing, Tuple template,
+			Callback callback) {
+		new Thread() {
+			public void run() {
+				Tuple t;
+				if (mode == linda.Linda.eventMode.READ) {
+					if (timing == Linda.eventTiming.IMMEDIATE){
+						t = read(template);
+					} else {
+						int index = tuplespace.size() - 1;
+						t = browsing(template, false, true, index);
+					}
+				} else {
+					if (timing == Linda.eventTiming.IMMEDIATE){
+						t = take(template);
+					} else {
+						int index = tuplespace.size() - 1;
+						t = browsing(template, true, true, index);
+					}
+				}
+				callback.call(t);
+			}
+		}.start();
+	}
 }
