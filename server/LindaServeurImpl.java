@@ -25,6 +25,10 @@ public class LindaServeurImpl extends UnicastRemoteObject implements LindaServeu
 	public LindaServeurImpl() throws RemoteException {
 		this.linda = new linda.shm.CentralizedLinda();
 	}
+
+	public LindaServeurImpl(CentralizedLinda l) throws RemoteException {
+		this.linda = l;
+	}
 	
 	public void changeLinda(CentralizedLinda l) throws RemoteException {
 		this.linda = l;
@@ -79,8 +83,15 @@ public class LindaServeurImpl extends UnicastRemoteObject implements LindaServeu
 		linda.debug(prefix);
 	}
 
-	public static void main(String args[]) {
-		int port = 4000; String URL;
+	public static void main(String args[], CentralizedLinda l) {
+		int port;
+		if (args.length > 0) {
+			port = Integer.parseInt(args[0]);
+		} else {
+			port = 4000;
+		}
+		System.out.println("hello my port is: "+port);
+		String URL;
 		/*try {
 			Integer I = new Integer(args[0]); port = I.intValue();
 		} catch (Exception ex) {
@@ -90,7 +101,12 @@ public class LindaServeurImpl extends UnicastRemoteObject implements LindaServeu
 			// Launching the naming service � rmiregistry � within the JVM
 			Registry registry = LocateRegistry.createRegistry(port);
 			// Create an instance of the server object
-			LindaServeur linda = new LindaServeurImpl();
+			LindaServeur linda;
+			if (l == null) {
+				linda = new LindaServeurImpl();
+			} else {
+				linda = new LindaServeurImpl(l);
+			}
 			// compute the URL of the server
 			URL = "//localhost:"+port+"/LindaServer";
 			Naming.rebind(URL, linda);

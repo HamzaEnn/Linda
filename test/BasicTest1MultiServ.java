@@ -5,6 +5,7 @@ import java.net.Socket;
 import java.rmi.RemoteException;
 
 import linda.*;
+import linda.server.LindaClient;
 import linda.server.LindaServeurImpl;
 import linda.server.LoadBalancer;
 import linda.shm.CentralizedLinda;
@@ -12,15 +13,21 @@ import linda.shm.CentralizedLinda;
 public class BasicTest1MultiServ {
 
     public static void main(String[] a) throws IOException {
+
+        String hosts[] = {"host1", "host2"};
+        int ports[] = {8081, 8082};
+        String args1[] = {String.valueOf(ports[0])};
+        String args2[] = {String.valueOf(ports[1])};
                 
         try {
-            final CentralizedLinda linda = new CentralizedLinda();
-            final LindaServeurImpl linda1 = new linda.server.LindaServeurImpl();
-            linda1.changeLinda(linda);
-            final LindaServeurImpl linda2 = new linda.server.LindaServeurImpl();
-            linda2.changeLinda(linda);
+            CentralizedLinda sharedLindaMemory = new CentralizedLinda();
+            LindaServeurImpl.main(args1, sharedLindaMemory);
+            LindaServeurImpl.main(args2, sharedLindaMemory);
+            final Linda linda1 = new LindaClient("//localhost:8081/LindaServer");
+            final Linda linda2 = new LindaClient("//localhost:8082/LindaServer");
             final Socket s = new Socket();
-            final LoadBalancer lb = new LoadBalancer(s);
+            //final LoadBalancer lb = new LoadBalancer(s);
+            //lb.setHP(hosts, ports);
             // final Linda linda = new linda.server.LindaClient("//localhost:4000/LindaServer");
                     
             new Thread() {
@@ -31,23 +38,17 @@ public class BasicTest1MultiServ {
                         e.printStackTrace();
                     }
                     Tuple motif = new Tuple(Integer.class, String.class);
-                    System.out.println("(1) will take:" );
                     Tuple res;
-                    try {
+                    System.out.println("(client2) will read:"+motif);
+                    res = linda2.read(motif);
+                    System.out.println("(client2) Resultat:" + res);
+                    linda1.debug("(client2)");
 
-                        System.out.println("(1) will read:");
-                        res = linda1.read(motif);
-                        System.out.println("(1) Resultat:" + res);
-                        linda1.debug("(1)");
+                    System.out.println("(client1) will read:"+motif);
+                    res = linda1.read(motif);
+                    System.out.println("(client1) Resultat:" + res);
+                    linda1.debug("(client1)");
 
-                        System.out.println("(2) will read:");
-                        res = linda2.read(motif);
-                        System.out.println("(2) Resultat:" + res);
-                        linda1.debug("(2)");
-
-                    } catch (RemoteException e) {
-                        e.printStackTrace();
-                    }
                 }
             }.start();
                     
@@ -59,25 +60,19 @@ public class BasicTest1MultiServ {
                         e.printStackTrace();
                     }
 
-                    try {
+                    Tuple t1 = new Tuple(4, 5);
+                    System.out.println("(client2) write: " + t1);
+                    linda1.write(t1);
 
-                        Tuple t1 = new Tuple(4, 5);
-                        System.out.println("(2) write: " + t1);
-                        linda1.write(t1);
+                    Tuple t11 = new Tuple(4, 5);
+                    System.out.println("(client2) write: " + t11);
+                    linda1.write(t11);
 
-                        Tuple t11 = new Tuple(4, 5);
-                        System.out.println("(2) write: " + t11);
-                        linda1.write(t11);
-
-                        Tuple t2 = new Tuple("hello", 15);
-                        System.out.println("(2) write: " + t2);
-                        linda1.write(t2);
-                                        
-                        linda1.debug("(2)");
-
-                    } catch (RemoteException e) {
-                        e.printStackTrace();
-                    }
+                    Tuple t2 = new Tuple("hello", 15);
+                    System.out.println("(client2) write: " + t2);
+                    linda1.write(t2);
+                                    
+                    linda1.debug("(client2)");
 
                 }
             }.start();
@@ -91,25 +86,19 @@ public class BasicTest1MultiServ {
                         e.printStackTrace();
                     }
 
-                    try {
+                    Tuple t3 = new Tuple(4, "foo");
+                    System.out.println("(client2) write: " + t3);
+                    linda2.write(t3);
 
-                        Tuple t3 = new Tuple(4, "foo");
-                        System.out.println("(2) write: " + t3);
-                        linda2.write(t3);
+                    Tuple t4 = new Tuple("hello", 15);
+                    System.out.println("(client2) write: " + t4);
+                    linda2.write(t4);
 
-                        Tuple t4 = new Tuple("hello", 15);
-                        System.out.println("(2) write: " + t4);
-                        linda2.write(t4);
-
-                        Tuple t5 = new Tuple("hello", 15);
-                        System.out.println("(2) write: " + t5);
-                        linda2.write(t5);
-                                        
-                        linda2.debug("(2)");
-
-                    } catch (RemoteException e) {
-                        e.printStackTrace();
-                    }
+                    Tuple t5 = new Tuple("hello", 15);
+                    System.out.println("(client2) write: " + t5);
+                    linda2.write(t5);
+                                    
+                    linda2.debug("(client2)");
 
                 }
             }.start();
