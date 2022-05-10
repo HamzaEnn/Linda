@@ -15,6 +15,9 @@ import linda.Linda;
 import linda.Linda.eventMode;
 import linda.Linda.eventTiming;
 import linda.Tuple;
+import linda.server.CallbackServeur;
+import linda.server.LindaServeur;
+import linda.server.RemoteCallback;
 
 public class LindaServeurImpl_Cache extends UnicastRemoteObject implements LindaServeur {
 
@@ -33,7 +36,7 @@ public class LindaServeurImpl_Cache extends UnicastRemoteObject implements Linda
 	private static MessageProducer producer;
 	
 
-	protected LindaServeurImpl() throws RemoteException {
+	protected LindaServeurImpl_Cache() throws RemoteException {
 		this.linda = new linda.shm.CentralizedLinda();
 	}
 
@@ -130,7 +133,7 @@ public class LindaServeurImpl_Cache extends UnicastRemoteObject implements Linda
 			// Launching the naming service � rmiregistry � within the JVM
 			//Registry registry = LocateRegistry.createRegistry(port);
 			// Create an instance of the server object
-			LindaServeur linda = new LindaServeurImpl();
+			LindaServeur linda = new LindaServeurImpl_Cache();
 			// compute the URL of the server
 			URL = "//localhost:"+port+"/LindaServer";
 			Naming.rebind(URL, linda);

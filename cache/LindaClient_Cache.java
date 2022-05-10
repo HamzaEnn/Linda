@@ -15,6 +15,9 @@ import java.rmi.RemoteException;
 import linda.Callback;
 import linda.Linda;
 import linda.Tuple;
+import linda.server.LindaServeur;
+import linda.server.RemoteCallback;
+import linda.server.RemoteCallbackImpl;
 
 /** Client part of a client/server implementation of Linda.
  * It implements the Linda interface and propagates everything to the server it is connected to.
@@ -33,7 +36,7 @@ public class LindaClient_Cache implements Linda {
 	/** Initializes the Linda implementation.
 	 *  @param serverURI the URI of the server, e.g. "rmi://localhost:4000/LindaServer" or "//localhost:4000/LindaServer".
 	 */
-	public LindaClient(String serverURI) {
+	public LindaClient_Cache(String serverURI) {
 		try {
 			// get the stub of the server object from the rmiregistry
 			this.linda = (LindaServeur) Naming.lookup(serverURI);
