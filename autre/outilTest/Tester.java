@@ -18,10 +18,9 @@ public class Tester {
 	
 	public static void main(String[] args) {
 
-		/*
 		CentralizedLinda centrLinda = new CentralizedLinda();
 		LindaServeurImpl.main(new String[0], centrLinda);
-		*/
+
 
 		if (args.length == 0) {
 			System.out.println("Test de tous les fichiers ...");
@@ -39,6 +38,7 @@ public class Tester {
 						e.printStackTrace();
 					}
 				}
+				System.out.print("Fin des tests.");
 			}else {
 				System.out.print("Aucun fichier test n'est trouvé!");
 			}
@@ -58,8 +58,8 @@ public class Tester {
 	}
 
 	private static void singleTest(File file) throws InterruptedException {
-        //final Linda linda = new LindaClient("//localhost:4000/LindaServer");
-		Linda linda = new CentralizedLinda(); 
+        final Linda linda = new LindaClient("//localhost:4000/LindaServer");
+		//Linda linda = new CentralizedLinda(); 
 		if (!file.exists()) {
 			System.out.print(file.getName() + " not found");
 			return;
