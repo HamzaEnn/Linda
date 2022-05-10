@@ -1,2 +1,1 @@
-3 read write
-4 readAll
+write read 3000

@@ -185,7 +185,7 @@ public class CentralizedLinda implements Linda {
 		} else {
 			callback.call(res);
 		}
-		
+
 	}
 
 	public void debug(String prefix) {
