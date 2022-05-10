@@ -9,7 +9,7 @@ public class CalculPremiersSeq {
 	public Tuple calculer(Tuple tupleNombres) {
 		Tuple temp = tupleNombres.deepclone();
 		Tuple tuplePremiers = new Tuple();
-		
+
         while (!tupleNombres.isEmpty()) {
     		Serializable premier = tupleNombres.getFirst();
     		tuplePremiers.add(premier);
@@ -29,7 +29,7 @@ public class CalculPremiersSeq {
 
 	public static void main(String[] args) {
 		int borneMax = 100000;
-		
+
         CalculPremiersSeq calculeur = new CalculPremiersSeq();
         
         Tuple t = new Tuple();
