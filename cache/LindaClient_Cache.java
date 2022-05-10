@@ -1,4 +1,4 @@
-package linda.server;
+package linda.cache;
 
 import java.util.ArrayList;
 import javax.jms.*;
@@ -19,7 +19,7 @@ import linda.Tuple;
 /** Client part of a client/server implementation of Linda.
  * It implements the Linda interface and propagates everything to the server it is connected to.
  * */
-public class LindaClient implements Linda {
+public class LindaClient_Cache implements Linda {
 
 	private HashMap<Tuple, Integer> cache;
 	LindaServeur linda;

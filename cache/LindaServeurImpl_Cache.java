@@ -1,4 +1,4 @@
-package linda.server;
+package linda.cache;
 
 import java.rmi.Naming;
 import javax.jms.*;
@@ -16,7 +16,7 @@ import linda.Linda.eventMode;
 import linda.Linda.eventTiming;
 import linda.Tuple;
 
-public class LindaServeurImpl extends UnicastRemoteObject implements LindaServeur {
+public class LindaServeurImpl_Cache extends UnicastRemoteObject implements LindaServeur {
 
 	
 	/**
