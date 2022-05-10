@@ -40,7 +40,7 @@ public class Tester {
 				}
 				System.out.print("Fin des tests.");
 			}else {
-				System.out.print("Aucun fichier test n'est trouvé!");
+				System.out.print("Aucun fichier test n'est trouvÃ©!");
 			}
 		} else {
 			try {
@@ -58,7 +58,7 @@ public class Tester {
 	}
 
 	private static void singleTest(File file) throws InterruptedException {
-        final Linda linda = new LindaClient("//localhost:4000/LindaServer");
+        	final Linda linda = new LindaClient("//localhost:4000/LindaServer");
 		//Linda linda = new CentralizedLinda(); 
 		if (!file.exists()) {
 			System.out.print(file.getName() + " not found");
