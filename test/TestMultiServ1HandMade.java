@@ -7,7 +7,7 @@ import linda.server.LindaClient;
 import linda.server.LindaServeurImpl;
 import linda.shm.CentralizedLinda;
 
-public class TestMultiServHandMade {
+public class TestMultiServ1HandMade {
 
     public static void main(String[] a) throws IOException {
 
@@ -98,4 +98,3 @@ public class TestMultiServHandMade {
             }
         }.start();
     }
-}

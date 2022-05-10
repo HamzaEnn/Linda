@@ -137,12 +137,13 @@ public class Synchronization {
 			if (alarm.containsTuple(tuple)) {
 				resultat.add(alarm.getCondition());
 				alarm.setResult(tuple);
-				alarms.remove(alarm);
 				if (alarm.taken()) {
 					break;
 				}
 			}
 		}
+
+		this.alarms.removeAll(resultat);
 
 		return resultat;
 	}
