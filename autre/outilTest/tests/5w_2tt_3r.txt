@@ -1,0 +1,3 @@
+50 write write write write write
+30 tryTake tryTake
+10 read read read

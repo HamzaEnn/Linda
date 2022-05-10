@@ -1,0 +1,5 @@
+read
+100 write write write write write write
+20 take
+40 take
+60 take
