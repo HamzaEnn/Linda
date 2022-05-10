@@ -2,8 +2,6 @@ package linda.server;
 
 import java.rmi.Naming;
 import java.rmi.RemoteException;
-import java.rmi.registry.LocateRegistry;
-import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.Collection;
 
@@ -90,7 +88,7 @@ public class LindaServeurImpl extends UnicastRemoteObject implements LindaServeu
 		} else {
 			port = 4000;
 		}
-		System.out.println("hello my port is: "+port);
+		System.out.println("Nouveau serveur au port: "+port);
 		String URL;
 		/*try {
 			Integer I = new Integer(args[0]); port = I.intValue();
@@ -99,7 +97,6 @@ public class LindaServeurImpl extends UnicastRemoteObject implements LindaServeu
 		}*/
 		try {
 			// Launching the naming service � rmiregistry � within the JVM
-			Registry registry = LocateRegistry.createRegistry(port);
 			// Create an instance of the server object
 			LindaServeur linda;
 			if (l == null) {
