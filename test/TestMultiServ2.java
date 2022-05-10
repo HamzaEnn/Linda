@@ -3,6 +3,9 @@ package linda.test;
 import java.io.IOException;
 import java.net.Socket;
 import java.rmi.RemoteException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Random;
 
 import linda.*;
 import linda.server.LindaClient;
@@ -10,21 +13,30 @@ import linda.server.LindaServeurImpl;
 import linda.server.LoadBalancer;
 import linda.shm.CentralizedLinda;
 
-public class BasicTest1MultiServ {
+public class TestMultiServ2 {
 
     public static void main(String[] a) throws IOException {
 
-        String hosts[] = {"host1", "host2"};
-        int ports[] = {8081, 8082};
-        String args1[] = {String.valueOf(ports[0])};
-        String args2[] = {String.valueOf(ports[1])};
+        int nbServ = 6;
+        int nbClient = 9;
                 
         try {
             CentralizedLinda sharedLindaMemory = new CentralizedLinda();
-            LindaServeurImpl.main(args1, sharedLindaMemory);
-            LindaServeurImpl.main(args2, sharedLindaMemory);
-            final Linda linda1 = new LindaClient("//localhost:8081/LindaServer");
-            final Linda linda2 = new LindaClient("//localhost:8082/LindaServer");
+            // Creation of nbServ servers from 8081 +
+            for (int k=1; k<nbServ; k++) {
+                String port[] = {String.valueOf(8080+k)};
+                LindaServeurImpl.main(port, sharedLindaMemory);
+            }
+
+            // Creation of nbClient clients, dispersed randomly in the created servers
+            ArrayList<Linda> lindas = new ArrayList<Linda>();
+            Random rand = new Random();
+            for (int k=0; k<nbClient; k++) {
+                int port = 8080+rand.nextInt(nbServ);
+                System.out.println("nouveau port client: "+port);
+                Linda client = new LindaClient("//localhost:"+port+"/lindaServer");
+                lindas.add(client);
+            }
             final Socket s = new Socket();
             //final LoadBalancer lb = new LoadBalancer(s);
             //lb.setHP(hosts, ports);
@@ -40,7 +52,7 @@ public class BasicTest1MultiServ {
                     Tuple motif = new Tuple(Integer.class, String.class);
                     Tuple res;
                     System.out.println("(client2) will read:"+motif);
-                    res = linda2.read(motif);
+                    res = lindas[3].read(motif);
                     System.out.println("(client2) Resultat:" + res);
                     linda1.debug("(client2)");
 
