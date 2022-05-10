@@ -25,21 +25,29 @@ public class Processes {
         		= new BufferedReader(new FileReader(file));
 		
 		String lineStr;
+		Actions actions = new Actions();
 		while ((lineStr = br.readLine()) != null) {
 			List<String> line = strToArray(lineStr);
-			this.threads.add(processLine(line, linda));
+			this.threads.add(processLine(line, linda, actions));
 		}
 		br.close();
 		
 		for (Thread thread : this.threads) {
 			thread.start();
 		}
+		for (Thread thread : this.threads) {
+			try {
+				thread.join();
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
 	}
 	
-	private Thread processLine(List<String> line, Linda linda) {
+	private Thread processLine(List<String> line, Linda linda, Actions actions) {
 
 		Iterator<String> iterator = line.iterator();
-		Actions actions = new Actions();
 
 		return new Thread() {
 			public void run() {
