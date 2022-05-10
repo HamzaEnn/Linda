@@ -26,17 +26,17 @@ public class CentralizedLinda implements Linda {
 
 	public void write(Tuple t) {
 
-		// Demander l'acces pour écrire(modifier) dans l'espace de tuple
+		// Demander l'acces pour Ã©crire(modifier) dans l'espace de tuple
 		sync.beginModify();
 
 		//Ajout d'une copie du tuple dans l'espace
 		espace.add(t.deepclone());
 
-		// Donner l'acces à l'opération suivante dans la file d'attente FIFO
+		// Donner l'acces Ã  l'opÃ©ration suivante dans la file d'attente FIFO
 		sync.endModify();
 
-		//Révéiller les callbacks en attente d'un tuple correspondant
-		//et les conditions correspondantes à des lectures(read) et des extractions(take) en attentes
+		//RÃ©vÃ©iller les callbacks en attente d'un tuple correspondant
+		//et les conditions correspondantes Ã  des lectures(read) et des extractions(take) en attentes
 		sync.wakeUp(t, espace);
 
 
@@ -44,27 +44,27 @@ public class CentralizedLinda implements Linda {
 
 	public Tuple take(Tuple template) {
 		// Essayer de prendre un tuple correspondant
-		// et puis on révéille les opérations dans la file FIFO
+		// et puis on rÃ©vÃ©ille les opÃ©rations dans la file FIFO
 		Tuple res = tryTake(template);
 
 		// On trouve aucun tuple matching le motif
 		if (res == null)
-			// on attend (en se bloquant sur une condition) une écriture d'un tuple qui matche le motif
+			// on attend (en se bloquant sur une condition) une Ã©criture d'un tuple qui matche le motif
 			res = takeInFuture(template);
 		return res;
 	}
 
-	// Méthode pour extraire un tuple correspondant au motif
+	// MÃ©thode pour extraire un tuple correspondant au motif
 	// si on trouve aucun tuple avec tryTake
 	private Tuple takeInFuture(Tuple template) {
 
-		//Booleen qui indique qu'on a efféctué l'extraction avec succés
+		//Booleen qui indique qu'on a effÃ©ctuÃ© l'extraction avec succÃ©s
 		boolean took = false;
-		//Le tuple à extraire
+		//Le tuple Ã  extraire
 		Tuple res = null;
 
 		while (!took) {
-			// bloque jusqu'à ce qu'un bon tuple vient d'etre écrit
+			// bloque jusqu'Ã  ce qu'un bon tuple vient d'etre Ã©crit
 			res = sync.getTupleWhenExists(template, true);
 
 			// Demander l'acces pour supprimer
@@ -81,11 +81,11 @@ public class CentralizedLinda implements Linda {
 	public Tuple read(Tuple template) {
 
 		// Essayer de lire un tuple correspondant
-		// et puis on révéille les opérations dans la file FIFO
+		// et puis on rÃ©vÃ©ille les opÃ©rations dans la file FIFO
 		Tuple res = tryRead(template);
 
 		if (res == null) {
-			// si on trouve pas, on se bloque jusqu'à ce qu'un tuple correspondant apparait dans l'espace.
+			// si on trouve pas, on se bloque jusqu'Ã  ce qu'un tuple correspondant apparait dans l'espace.
 			res = sync.getTupleWhenExists(template, false);
 		}
 		
@@ -94,12 +94,12 @@ public class CentralizedLinda implements Linda {
 
 	public Tuple tryTake(Tuple template) {
 
-		// Demander l'acces pour écrire(modifier) dans l'espace de tuple
+		// Demander l'acces pour Ã©crire(modifier) dans l'espace de tuple
 		sync.beginModify();
 
 		Tuple res = espace.rechercher(template, true);
 
-		// Donner l'acces à l'opération suivante dans la file d'attente FIFO
+		// Donner l'acces Ã  l'opÃ©ration suivante dans la file d'attente FIFO
 		sync.endModify();
 
 		return res;
@@ -111,7 +111,7 @@ public class CentralizedLinda implements Linda {
 
 		Tuple res = espace.rechercher(template, false);
 
-		// Donner l'acces à l'opération suivante dans la file d'attente FIFO
+		// Donner l'acces Ã  l'opÃ©ration suivante dans la file d'attente FIFO
 		sync.endRead();
 
 		return res;
@@ -179,7 +179,7 @@ public class CentralizedLinda implements Linda {
 		}
 
 		// Si on trouve pas ou si le timing est future,
-		// on ajoute une alarme non bloquante (à reveiller par write)
+		// on ajoute une alarme non bloquante (Ã  reveiller par write)
 		if (res == null) {
 			sync.addEventAlarm(template, callback, mode);
 		} else {
