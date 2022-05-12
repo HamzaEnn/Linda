@@ -1,0 +1,4 @@
+40 tryTake tryTake
+40 tryRead
+20 write write write
+read take tryTake

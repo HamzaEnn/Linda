@@ -1,0 +1,6 @@
+write write write write write write write write write write
+50 write write write write write write write write write write 
+100 write write write write write write write write write write
+20 read read read read read read read read read read
+70 read read read read read read read read read read
+120 read read read read read read read read read read
